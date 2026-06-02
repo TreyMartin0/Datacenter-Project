@@ -56,7 +56,7 @@ const color = isBinary
   ? null
   : d3.scaleSequentialLog(d3.interpolateYlOrRd).domain([1, maxVal]).clamp(true);
 
-// Legend: single swatch for binary (cancelled), gradient strip for everything else.
+// Legend
 const legendNode = (() => {
   const svg = d3.create("svg").attr("height", 30);
   if (isBinary) {
@@ -85,7 +85,7 @@ display(legendNode);
 // Standard Albers USA canvas size matching the us-atlas projection
 const width = 975;
 const height = 610;
-// Albers USA projection scaled to fit the 975×610 canvas
+// Albers USA projection
 const projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
 // Path generator that converts GeoJSON coordinates to SVG path strings
 const path = d3.geoPath(projection);
@@ -93,7 +93,7 @@ const path = d3.geoPath(projection);
 // Resolve the currently selected county object, or null if none selected
 const selected = selectedFips ? countyByFips.get(selectedFips) : null;
 
-// Create the root SVG element; max-width makes it responsive
+// Create the root SVG element
 const svg = d3.create("svg")
   .attr("viewBox", [0, 0, width, height])
   .attr("width", width)
@@ -110,13 +110,13 @@ svg.append("g")
       const v = rec ? rec[measure] : 0;
       // Counties with no data get a neutral gray fill
       if (v <= 0) return "#f0f0f0";
-      // Cancelled uses a flat red; all others use the sequential color scale
+      // Cancelled uses a flat red
       return isBinary ? cancelledColor : color(v);
     })
     .attr("stroke", "#fff")
     .attr("stroke-width", 0.2)
     .on("click", (event, d) => {
-      // Toggle selection: clicking the same county again deselects it
+      // Toggle selection
       const fips = String(d.id).padStart(5, "0");
       const rec = countyByFips.get(fips);
       if (!rec || rec.total === 0) return;
