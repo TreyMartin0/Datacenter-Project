@@ -3,24 +3,32 @@
 Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure.
 
 ```js
+// Load the TopoJSON library for converting topology data to GeoJSON shapes
 import * as topojson from "npm:topojson-client";
 ```
 
 ```js
+// Load county facility records and U.S. county/state geometry
 const counties = await FileAttachment("data/data_prep.json").json();
 const us = await FileAttachment("data/counties-10m.json").json();
 
+// Index county records by FIPS code for fast lookups during map rendering
 const countyByFips = new Map(counties.map((c) => [c.fips, c]));
+// Convert TopoJSON topology into individual GeoJSON county polygons
 const countyFeatures = topojson.feature(us, us.objects.counties).features;
+// Build a mesh of state borders (shared edges only) for the border overlay
 const stateMesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
 ```
 
 ```js
+// Reactive mutable that tracks which county FIPS is currently selected
 const selectedFips = Mutable(null);
+// Setter used inside click handlers to update the selected county
 const setSelected = (fips) => selectedFips.value = fips;
 ```
 
 ```js
+// Radio input that controls which data field colors the map
 const measure = view(Inputs.radio(
   new Map([
     ["Total facilities",   "total"],
@@ -35,11 +43,15 @@ const measure = view(Inputs.radio(
 ```
 
 ```js
+// Collect non-zero values for the active measure to set the color scale domain
 const measureValues = counties.map((c) => c[measure]).filter((v) => v > 0);
+// Cancelled uses a flat binary color instead of a gradient scale
 const isBinary = measure === "cancelled";
 const cancelledColor = "#c92a2a";
 
+// Find the maximum value to anchor the high end of the color scale
 const maxVal = d3.max(measureValues) ?? 1;
+// Log scale so high-outlier counties don't wash out all other variation
 const color = isBinary
   ? null
   : d3.scaleSequentialLog(d3.interpolateYlOrRd).domain([1, maxVal]).clamp(true);
@@ -48,10 +60,12 @@ const color = isBinary
 const legendNode = (() => {
   const svg = d3.create("svg").attr("height", 30);
   if (isBinary) {
+    // Single colored square + label for the binary cancelled view
     svg.attr("width", 180);
     svg.append("rect").attr("x", 0).attr("y", 0).attr("width", 14).attr("height", 14).attr("rx", 3).attr("fill", cancelledColor);
     svg.append("text").attr("x", 20).attr("y", 11).attr("font-size", 11).attr("fill", "#aaa").text("Has cancelled facilities");
   } else {
+    // Gradient bar from low (yellow) to high (dark red) with labeled endpoints
     const w = 240, h = 12;
     svg.attr("width", w + 60);
     const grad = svg.append("defs").append("linearGradient").attr("id", "leg-grad");
@@ -68,18 +82,24 @@ display(legendNode);
 ```
 
 ```js
+// Standard Albers USA canvas size matching the us-atlas projection
 const width = 975;
 const height = 610;
+// Albers USA projection scaled to fit the 975×610 canvas
 const projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
+// Path generator that converts GeoJSON coordinates to SVG path strings
 const path = d3.geoPath(projection);
 
+// Resolve the currently selected county object, or null if none selected
 const selected = selectedFips ? countyByFips.get(selectedFips) : null;
 
+// Create the root SVG element; max-width makes it responsive
 const svg = d3.create("svg")
   .attr("viewBox", [0, 0, width, height])
   .attr("width", width)
   .attr("style", "max-width: 100%; height: auto; cursor: pointer;");
 
+// Draw one path per county, colored by the active measure
 svg.append("g")
   .selectAll("path")
   .data(countyFeatures)
@@ -88,24 +108,29 @@ svg.append("g")
     .attr("fill", (d) => {
       const rec = countyByFips.get(String(d.id).padStart(5, "0"));
       const v = rec ? rec[measure] : 0;
+      // Counties with no data get a neutral gray fill
       if (v <= 0) return "#f0f0f0";
+      // Cancelled uses a flat red; all others use the sequential color scale
       return isBinary ? cancelledColor : color(v);
     })
     .attr("stroke", "#fff")
     .attr("stroke-width", 0.2)
     .on("click", (event, d) => {
+      // Toggle selection: clicking the same county again deselects it
       const fips = String(d.id).padStart(5, "0");
       const rec = countyByFips.get(fips);
       if (!rec || rec.total === 0) return;
       setSelected(selectedFips === fips ? null : fips);
     })
   .append("title")
+    // Native browser tooltip shown on hover
     .text((d) => {
       const rec = countyByFips.get(String(d.id).padStart(5, "0"));
       if (!rec || rec.total === 0) return "";
       return `${rec.name}\n${rec.total} facilities · ${rec.mwTotal.toLocaleString()} MW\n${rec.pushbackCount > 0 ? `${rec.pushbackCount} with community pushback` : "no recorded pushback"}`;
     });
 
+// Draw a black outline around the selected county on top of the fill layer
 if (selected) {
   svg.append("path")
       .datum(countyFeatures.find((d) => String(d.id).padStart(5, "0") === selected.fips))
@@ -115,6 +140,7 @@ if (selected) {
       .attr("d", path);
 }
 
+// Draw white state border lines on top of county fills
 svg.append("path")
     .datum(stateMesh)
     .attr("fill", "none")
@@ -127,12 +153,11 @@ display(svg.node());
 ```
 
 ```js
-// card explaining the most notable facility
+// Format helpers for displaying megawatts and acreage in the detail card
 const fmtMW = (n) => n == null ? "—" : `${Number(n).toLocaleString()} MW`;
 const fmtAcres = (n) => n == null ? null : `${Number(n).toLocaleString()} acres`;
 
-// Style helpers 
-const chipStyle = "display:inline-block; padding:4px 10px; margin:0 6px 6px 0; background:#1a1a1a; border:1px solid #333; border-radius:14px; font-size:0.85em;";
+// Returns a color hex for each facility status string
 const statusColor = (s) => {
   const x = (s || "").toLowerCase();
   if (x.includes("operating")) return "#2b8a3e";
@@ -142,9 +167,10 @@ const statusColor = (s) => {
   if (x.includes("suspend")) return "#a61e4d";
   return "#555";
 };
+// Renders a colored pill badge for a facility's status string
 const statusBadge = (s) => html`<span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.78em; background:${statusColor(s)}; color:white;">${(s || "—").replace("Approved/Permitted/Under construction", "Under construction")}</span>`;
 
-
+// Maps each measure key to a status filter keyword and a human-readable card label
 const measureMeta = {
   total:        { filter: null,        label: "Largest facility" },
   mwTotal:      { filter: null,        label: "Highest-capacity facility" },
@@ -154,25 +180,32 @@ const measureMeta = {
   pushbackCount:{ filter: "pushback",  label: "Contested facility" },
 };
 
+// Picks the most relevant facility to spotlight based on the active measure
 function pickSpotlight(facilities, measure) {
   const meta = measureMeta[measure] ?? measureMeta.total;
   let pool = facilities;
   if (meta.filter === "pushback") {
+    // Rank contested facilities by richness of advocacy detail, then by MW
     pool = facilities.filter(f => f.pushback).sort((a, b) => {
       const score = f => (f.advocacyInfo ? 2 : 0) + (f.resistanceStatus ? 1 : 0) + (f.sources?.length > 0 ? 1 : 0);
       return score(b) - score(a) || (b.mw ?? 0) - (a.mw ?? 0);
     });
   } else if (meta.filter) {
+    // Filter to only facilities matching the active status keyword
     pool = facilities.filter(f => f.status?.toLowerCase().includes(meta.filter));
   }
+  // Fall back to full list if no facilities match the filter
   if (!pool.length) pool = facilities;
+  // Return the largest facility by MW from the filtered pool
   return pool.slice().sort((a, b) => (b.mw ?? 0) - (a.mw ?? 0))[0] ?? null;
 }
 
 if (!selected) {
   display(html`<p style="color:#888;"><em>Hover any colored county for a quick read. Click a county to see operators and the spotlight facility.</em></p>`);
 } else {
+  // Pick the spotlight facility based on the currently active measure
   const sp = pickSpotlight(selected.facilities, measure);
+  // Filter out "Unknown" operators and cap display at 6 named chips
   const ops = selected.operators.filter((o) => o.name !== "Unknown").slice(0, 6);
   const unknownGroup = selected.operators.find((o) => o.name === "Unknown");
   const namedCount = selected.operators.filter((o) => o.name !== "Unknown").length;
