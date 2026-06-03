@@ -125,10 +125,10 @@ The story of data centers is therefore not just a story about technology. It is 
 
 Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure. Then, scroll down to see where datacenters are located in that county compared with population centers.
 
-# Mapping the Data Center Buildout
-
-Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure. Then, scroll down to see where datacenters are laid out within the currently selected county.
-
+```js
+// Load the TopoJSON library for converting topology data to GeoJSON shapes
+import * as topojson from "npm:topojson-client";
+```
 
 ```js
 
@@ -543,14 +543,17 @@ const mapView = (() => {
   let currentScale = 1;
 
   // --- Container ---
-  const container = html`<div style="font-family: sans-serif;margin-top:12px;">
-  <div id="metric-btns" style="display:flex; gap:8px; margin-bottom:16px;"></div>
-
-  <svg id="map" width="1200" height="550"></svg>
-
-  <div id="tooltip" style="position:fixed; background:#fff; border:1px solid #ccc; 
-    padding:6px 10px; border-radius:4px; font-size:13px; pointer-events:none; opacity:0;"></div>
-</div>`;
+  const container = html`<div style="font-family: sans-serif;">
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+      <span id="county-label" style="font-size:1.2em; font-weight:bold;"></span>
+    </div>
+    <div id="metric-btns" style="display:flex; gap:8px; margin-bottom:16px;"></div>
+    <div style="margin-bottom:12px;">
+    </div>
+    <svg id="map" width="1200" height="550"></svg>
+    <div id="tooltip" style="position:fixed; background:#fff; border:1px solid #ccc; 
+      padding:6px 10px; border-radius:4px; font-size:13px; pointer-events:none; opacity:0;"></div>
+  </div>`;
 
   // --- Metric buttons ---
   const metricButtons = [];
@@ -604,10 +607,16 @@ selectedState.renderLocal = renderLocal;
     svg.selectAll(".boundary").remove();
     svg.selectAll(".dc").remove();
     svg.selectAll(".legend").remove();
-    svg.selectAll(".county-empty").remove();
-    tooltip.style("opacity", 0);
-
     const metric = metrics[metricIndex];
+
+  if (!selectedState.fips || !selectedState.countyData) {
+    container.querySelector("#county-label").textContent = "Click a county in the national map.";
+    return;
+  }
+
+  const selectedCountyRecord = countyByFips.get(selectedState.fips);
+  const boundary = selectedState.countyData.county;
+  const towns = selectedState.countyData.places;
 
     metricButtons.forEach((btn, i) => {
       if (i === metricIndex) {
@@ -621,22 +630,13 @@ selectedState.renderLocal = renderLocal;
       }
     });
 
-    if (!selectedState.fips || !selectedState.countyData) {
-      return;
-    }
-
-    const selectedCountyRecord = countyByFips.get(selectedState.fips);
-    if (!selectedCountyRecord) return;
-
-    const boundary = selectedState.countyData.county;
-    const towns = selectedState.countyData.places;
     
     const dcs = selectedCountyRecord.facilities
-    .filter(d =>
-      d.lat != null &&
-      d.lon != null &&
-      facilityMatchesMeasure(d, measure)
-    );
+  .filter(d =>
+    d.lat != null &&
+    d.lon != null &&
+    facilityMatchesMeasure(d, measure)
+  );
 
 
     const operatingDcs = selectedCountyRecord.facilities
@@ -649,6 +649,7 @@ selectedState.renderLocal = renderLocal;
     const sqftValues = operatingDcs.map(d => d.sqft).filter(v => v != null && v > 0);
     const sqft = d => (d.sqft == null || d.sqft === 0) ? medSqft : d.sqft;
 
+    container.querySelector("#county-label").textContent = selectedCountyRecord?.name ?? selectedState.fips;
 
     //svg.selectAll("*").remove();
 
