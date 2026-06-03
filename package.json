@@ -11,6 +11,7 @@
   "dependencies": {
     "@observablehq/framework": "^1.13.4",
     "arquero": "^8.0.3",
+    "jszip": "^3.10.1",
     "topojson-client": "^3.1.0",
     "us-atlas": "^3.0.1"
   },
