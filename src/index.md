@@ -61,10 +61,9 @@ const chart = vl.layer(
   .width(885).height(560)
   .background("transparent")
   .config({
-    title: { color: "#fff" },
     legend: { labelColor: "#fff", titleColor: "#fff" }
   })
-  .title("U.S. Data Center Development Status");
+  .title({ text: "U.S. Data Centers", color: "#fff", fontSize: 24 });
 
 display(await chart.render());
 ```
