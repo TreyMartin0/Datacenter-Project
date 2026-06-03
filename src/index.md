@@ -3,9 +3,91 @@
 Artificial intelligence has rapidly transformed from a niche technology into a major driver of economic investment. Behind every AI chatbot, image generator, and recommendation system is an enormous amount of computing infrastructure. As demand for AI continues to grow, so does the need for data centers.
 
 What was once an industry concentrated in a handful of technology hubs is now spreading across the country. Companies are proposing new facilities in urban areas, suburban communities, and rural regions alike, making data centers an increasingly visible part of the American landscape.
+```js
+import * as vega from "npm:vega";
+import * as vegaLite from "npm:vega-lite";
+import * as vegaLiteApi from "npm:vega-lite-api";
+const vl = vegaLiteApi.register(vega, vegaLite);
+```
 
-<!-- Insert Vis 1 Here -->
+```js
+const mapData = (await FileAttachment("data/facilities.json").json())
+  .filter((d) => ["Operating", "Proposed"].includes(d.status));
+const usTopo = await FileAttachment("data/counties-10m.json").json();
+const mwMax = d3.max(mapData, (d) => d.mw);
+```
 
+```js
+const showProposed = Mutable(false);
+const toggleProposed = () => (showProposed.value = !showProposed.value);
+```
+
+```js
+const facilitiesShown = showProposed
+  ? mapData
+  : mapData.filter((d) => d.status !== "Proposed");
+```
+
+```js
+const chart = vl.layer(
+  vl.markGeoshape({ fill: "#f5f5f0", stroke: "#bbb", strokeWidth: 0.5 })
+    .data(vl.topojson(usTopo).feature("states")),
+  vl.markCircle({ opacity: 0.8, stroke: "white", strokeWidth: 0.6 })
+    .data(facilitiesShown)
+    .encode(
+      vl.longitude().fieldQ("long"),
+      vl.latitude().fieldQ("lat"),
+      vl.size().fieldQ("mw")
+        .scale({ domain: [0, mwMax], range: [60, 900], type: "sqrt" })
+        .legend({ title: "Power (MW)" }),
+      vl.color().fieldN("status")
+        .scale({
+          domain: ["Operating", "Proposed"],
+          range: ["#2b7a3d", "#d97706"]
+        })
+        .legend({ title: "Status" }),
+      vl.tooltip([
+        { field: "name", title: "Facility" },
+        { field: "operator", title: "Operator" },
+        { field: "state", title: "State" },
+        { field: "county", title: "County" },
+        { field: "status", title: "Status" },
+        { field: "mw", title: "Power (MW)", format: "," },
+        { field: "sizeSqft", title: "Size (sqft)", format: "," }
+      ])
+    )
+)
+  .project({ type: "albersUsa" })
+  .width(885).height(560)
+  .background("transparent")
+  .config({
+    title: { color: "#fff" },
+    legend: { labelColor: "#fff", titleColor: "#fff" }
+  })
+  .title("U.S. Data Center Development Status");
+
+display(await chart.render());
+```
+
+```js
+display(html`<button
+  onclick=${toggleProposed}
+  style="
+    display: block;
+    margin: 16px auto;
+    padding: 14px 32px;
+    font-size: 1.05em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: ${showProposed ? "#dd831b" : "#333"};
+    border: 2px solid ${showProposed ? "#f08f20" : "#555"};
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  "
+>${showProposed ? "Hide proposed facilities" : "Show proposed facilities"}</button>`);
+```
 The map above illustrates both existing and proposed data centers across the United States. While existing facilities are already widespread, the number of proposed projects demonstrates that expansion is far from over. The growth of AI has created unprecedented demand for computing power, leading technology companies and developers to pursue new facilities at an accelerating pace.
 
 However, the expansion of data centers has not been universally welcomed.
