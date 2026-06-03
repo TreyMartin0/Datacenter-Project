@@ -1,11 +1,130 @@
-# Mapping the Data Center Buildout
+# When Communities Push Back: Public Resistance to the Data Center Boom
 
-Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure.
+Artificial intelligence has rapidly transformed from a niche technology into a major driver of economic investment. Behind every AI chatbot, image generator, and recommendation system is an enormous amount of computing infrastructure. As demand for AI continues to grow, so does the need for data centers.
+
+What was once an industry concentrated in a handful of technology hubs is now spreading across the country. Companies are proposing new facilities in urban areas, suburban communities, and rural regions alike, making data centers an increasingly visible part of the American landscape.
+```js
+
+const vl = vegaLiteApi.register(vega, vegaLite);
+
+import * as vega from "npm:vega";
+import * as vegaLite from "npm:vega-lite";
+import * as vegaLiteApi from "npm:vega-lite-api";
+import * as aq from "npm:arquero";
+import JSZip from "npm:jszip";
+import * as topojson from "npm:topojson-client";
+
+
+
+```
 
 ```js
-// Load the TopoJSON library for converting topology data to GeoJSON shapes
-import * as topojson from "npm:topojson-client";
+const mapData = (await FileAttachment("data/facilities.json").json())
+  .filter((d) => ["Operating", "Proposed"].includes(d.status));
+const usTopo = await FileAttachment("data/counties-10m.json").json();
+const mwMax = d3.max(mapData, (d) => d.mw);
 ```
+
+```js
+const showProposed = Mutable(false);
+const toggleProposed = () => (showProposed.value = !showProposed.value);
+```
+
+```js
+const facilitiesShown = showProposed
+  ? mapData
+  : mapData.filter((d) => d.status !== "Proposed");
+```
+
+```js
+const chart = vl.layer(
+  vl.markGeoshape({ fill: "#f5f5f0", stroke: "#bbb", strokeWidth: 0.5 })
+    .data(vl.topojson(usTopo).feature("states")),
+  vl.markCircle({ opacity: 0.8, stroke: "white", strokeWidth: 0.6 })
+    .data(facilitiesShown)
+    .encode(
+      vl.longitude().fieldQ("long"),
+      vl.latitude().fieldQ("lat"),
+      vl.size().fieldQ("mw")
+        .scale({ domain: [0, mwMax], range: [60, 900], type: "sqrt" })
+        .legend({ title: "Power (MW)" }),
+      vl.color().fieldN("status")
+        .scale({
+          domain: ["Operating", "Proposed"],
+          range: ["#2b7a3d", "#d97706"]
+        })
+        .legend({ title: "Status" }),
+      vl.tooltip([
+        { field: "name", title: "Facility" },
+        { field: "operator", title: "Operator" },
+        { field: "state", title: "State" },
+        { field: "county", title: "County" },
+        { field: "status", title: "Status" },
+        { field: "mw", title: "Power (MW)", format: "," },
+        { field: "sizeSqft", title: "Size (sqft)", format: "," }
+      ])
+    )
+)
+  .project({ type: "albersUsa" })
+  .width(885).height(560)
+  .background("transparent")
+  .config({
+    legend: { labelColor: "#fff", titleColor: "#fff" }
+  })
+  .title({ text: "U.S. Data Centers", color: "#fff", fontSize: 24 });
+
+display(await chart.render());
+```
+
+```js
+display(html`<button
+  onclick=${toggleProposed}
+  style="
+    display: block;
+    margin: 16px auto;
+    padding: 14px 32px;
+    font-size: 1.05em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: ${showProposed ? "#dd831b" : "#333"};
+    border: 2px solid ${showProposed ? "#f08f20" : "#555"};
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  "
+>${showProposed ? "Hide proposed facilities" : "Show proposed facilities"}</button>`);
+```
+The map above illustrates both existing and proposed data centers across the United States. While existing facilities are already widespread, the number of proposed projects demonstrates that expansion is far from over. The growth of AI has created unprecedented demand for computing power, leading technology companies and developers to pursue new facilities at an accelerating pace.
+
+However, the expansion of data centers has not been universally welcomed.
+
+Many residents view data centers as a source of concern rather than opportunity. Critics point to the large amounts of electricity and water these facilities consume, their potential environmental impacts, and the strain they can place on local infrastructure. Others question whether communities should bear these costs in order to support technologies that primarily benefit large corporations. Concerns about artificial intelligence itself, including its societal impacts, labor implications, and energy consumption, have further fueled opposition.
+
+<!-- Insert Vis 2 Here -->
+
+Public opinion reflects these concerns. As shown above, a substantial majority of respondents express opposition to having data centers built in their communities. While motivations vary, the pattern is clear. Many people are skeptical of the costs associated with data center development and are increasingly willing to voice those concerns.
+
+The question, then, is whether that opposition actually matters.
+
+Developers and technology companies often possess significant financial resources and political influence, which can make large infrastructure projects appear inevitable. Yet local communities have more power than they may realize. Public meetings, community organizing, advocacy groups, and local government decisions can all affect the outcome of proposed developments.
+
+<!-- Insert Vis 3 Here -->
+
+The final map highlights locations where proposed data centers have faced pushback, alongside projects that were ultimately canceled. It becomes apparent that areas that experienced substantial public pushback frequently overlap with locations where projects were later canceled.
+
+While community opposition is not the sole factor behind every cancellation, the relationship is difficult to ignore. Public pressure can influence local officials, affect permitting decisions, generate media attention, and increase the costs and risks associated with development. In many cases, organized residents have successfully altered or halted projects that once appeared certain to move forward.
+
+As demand for AI infrastructure continues to grow, conflicts over data center development are likely to become increasingly common. The expansion of technology will continue to affect communities across the country, but these decisions are not made in a vacuum. The evidence suggests that local voices can influence outcomes and that community engagement remains an important force in determining how and where future development occurs.
+
+The story of data centers is therefore not just a story about technology. It is also a story about civic participation. As communities confront the opportunities and challenges of the AI era, public engagement can play an important part in affecting what gets built, where it gets built, and whether it gets built at all.
+
+---
+
+# Mapping the Data Center Buildout
+
+Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure. Then, scroll down to see where datacenters are located in that county compared with population centers.
+
 
 ```js
 
@@ -112,14 +231,15 @@ const legendNode = (() => {
   }
   return svg.node();
 })();
-const nationalLegendNode = legendNode;
+display(legendNode);
 ```
 
 ```js
 // Standard Albers USA canvas size matching the us-atlas projection
-const width = 760;
-const height = 575;
-const projection = d3.geoAlbersUsa().scale(1000).translate([380, 237.5]);
+const width = 975;
+const height = 610;
+// Albers USA projection
+const projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
 // Path generator that converts GeoJSON coordinates to SVG path strings
 const path = d3.geoPath(projection);
 
@@ -200,7 +320,7 @@ svg.append("path")
     .attr("stroke-linejoin", "round")
     .attr("d", path);
 
-const nationalMapNode = svg.node();
+display(svg.node());
 
 // Format helpers for displaying megawatts and acreage in the detail card
 const fmtMW = (n) => n == null ? "—" : `${Number(n).toLocaleString()} MW`;
@@ -368,6 +488,8 @@ function renderCountyDetails() {
 selectedState.renderCountyDetails = renderCountyDetails;
 renderCountyDetails();
 
+display(countyDetails);
+
 import * as aq from "npm:arquero";
 
 const {op} = aq;
@@ -417,14 +539,12 @@ const mapView = (() => {
   let currentScale = 1;
 
   // --- Container ---
-  const container = html`<div style="font-family: sans-serif;">
-    <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
-      <span id="county-label" style="font-size:1.2em; font-weight:bold;"></span>
-    </div>
+  const container = html`<div style="font-family: sans-serif;margin-top:20px;">
+
     <div id="metric-btns" style="display:flex; gap:8px; margin-bottom:16px;"></div>
     <div style="margin-bottom:12px;">
     </div>
-    <svg id="map" width="760" height="620" style="max-width:100%; height:auto;"></svg>
+    <svg id="map" width="1200" height="550"></svg>
     <div id="tooltip" style="position:fixed; background:#fff; border:1px solid #ccc; 
       padding:6px 10px; border-radius:4px; font-size:13px; pointer-events:none; opacity:0;"></div>
   </div>`;
@@ -483,11 +603,6 @@ selectedState.renderLocal = renderLocal;
     svg.selectAll(".legend").remove();
     const metric = metrics[metricIndex];
 
-  if (!selectedState.fips || !selectedState.countyData) {
-    container.querySelector("#county-label").textContent = "Click a county in the national map.";
-    return;
-  }
-
   const selectedCountyRecord = countyByFips.get(selectedState.fips);
   const boundary = selectedState.countyData.county;
   const towns = selectedState.countyData.places;
@@ -523,12 +638,10 @@ selectedState.renderLocal = renderLocal;
     const sqftValues = operatingDcs.map(d => d.sqft).filter(v => v != null && v > 0);
     const sqft = d => (d.sqft == null || d.sqft === 0) ? medSqft : d.sqft;
 
-    container.querySelector("#county-label").textContent = selectedCountyRecord?.name ?? selectedState.fips;
-
     //svg.selectAll("*").remove();
 
     const projection = d3.geoMercator()
-      .fitSize([500, 580], boundary);
+      .fitSize([900, 550], boundary);
 
     const path = d3.geoPath(projection);
 
@@ -550,7 +663,7 @@ selectedState.renderLocal = renderLocal;
     
     const legend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", "translate(585, 40)");
+      .attr("transform", "translate(900, 40)");
     
     const legendId = `legend-gradient-${selectedState.fips}-${metricIndex}`;
     
@@ -609,7 +722,7 @@ selectedState.renderLocal = renderLocal;
     
     const sizeLegend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", "translate(585, 260)");
+      .attr("transform", "translate(900, 275)");
     
     sizeLegend.append("text")
       .attr("x", 0)
@@ -656,7 +769,7 @@ selectedState.renderLocal = renderLocal;
 
     const statusLegend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", "translate(585, 390)");
+      .attr("transform", "translate(900, 425)");
 
     statusLegend.append("text")
       .attr("x", 0)
@@ -797,34 +910,11 @@ selectedState.renderLocal = renderLocal;
   return container;
 })();
 
-display(html`
-  <div style="max-width: 1700px;">
-    <div style="
-      display:grid;
-      grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
-      gap:20px;
-      align-items:start;
-    ">
-      <div style="min-width:0;">
-        <h3 style="margin:0 0 6px 0;">Nationwide view</h3>
-        <div style="margin-bottom:8px;">${nationalLegendNode}</div>
-        ${nationalMapNode}
-      </div>
-
-      <div style="min-width:0;">
-        <h3 style="margin:0 0 6px 0;">County view</h3>
-        ${mapView}
-      </div>
-    </div>
-
-    <div style="margin-top:18px;">
-      ${countyDetails}
-    </div>
-  </div>
-`);
+display(mapView);
 ```
 
 ## Design Rationale
+
 I first began this assignment with a different focus: do data center counties grow economically differently from their neighbors. After making a version of this, I found that my data had too little information to make any claims about my findings. Rather than making a claim I couldn't defend honestly, I decided to move to a more concrete question: where is the buildout happening, who is running it, and where are communities pushing back? I chose this so that every measure is a counted fact and not an inferred effect.
 
 The quesiton I ask is pretty spatial, so I decide to go with a choropleth as my view. Counties were colored on a sequential ramp with a logarithmic scale. I made this decision because some counties, like Loudoun, VA and Pike, OH dominate the distribution and would saturate a linear scale. The zero-value counties were rendered light gray to seperate them from the counties with low facility counts.
@@ -837,7 +927,7 @@ The pushback field also saw some iteration. The "pushback count" alone was abstr
 
 Encoding channels are kept seperate: color encodes the chosen measure, a black outline marks the selected county, and the detail panel uses a categorical palette for status.
 
-## References / Data Sources 
+## References / Data Sources
 
 U.S data center facility records (data_centers.csv) - https://data.msdlive.org/records/65g71-a4731
 
@@ -849,5 +939,4 @@ County boundary geometry — us-atlas (https://github.com/topojson/us-atlas)
 
 Github Repository - https://github.com/TreyMartin0/Assignment5_CSC477
 
-*There is two additional dataset in the repository that are not used, but I can provide links upon request if needed*
-
+_There is two additional dataset in the repository that are not used, but I can provide links upon request if needed_
