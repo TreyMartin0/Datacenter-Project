@@ -94,6 +94,69 @@ However, the expansion of data centers has not been universally welcomed.
 Many residents view data centers as a source of concern rather than opportunity. Critics point to the large amounts of electricity and water these facilities consume, their potential environmental impacts, and the strain they can place on local infrastructure. Others question whether communities should bear these costs in order to support technologies that primarily benefit large corporations. Concerns about artificial intelligence itself, including its societal impacts, labor implications, and energy consumption, have further fueled opposition.
 
 <!-- Insert Vis 2 Here -->
+```js
+const gallupData = [
+  { label: "Strongly favor",  pct: 7,  color: "d3.schemeCategory10[0]" },
+  { label: "Somewhat favor",  pct: 20, color: "d3.schemeCategory10[1]" },
+  { label: "Somewhat oppose", pct: 23, color: "d3.schemeCategory10[2]" },
+  { label: "Strongly oppose", pct: 48, color: "d3.schemeCategory10[3]" },
+];
+
+const gWidth = 700, gHeight = 120, barHeight = 44;
+const margin = { left: 50, right: 20 };
+const innerWidth = gWidth - margin.left - margin.right;
+
+const gSvg = d3.create("svg")
+  .attr("width", gWidth)
+  .attr("height", gHeight);
+
+// Legend
+const legend = gSvg.append("g").attr("transform", "translate(0, 10)");
+let lx = 0;
+gallupData.forEach(d => {
+  legend.append("rect")
+    .attr("x", lx).attr("y", 0)
+    .attr("width", 14).attr("height", 14)
+    .attr("rx", 2).attr("fill", d.color);
+  const label = legend.append("text")
+    .attr("x", lx + 18).attr("y", 11)
+    .attr("font-size", 11)
+    .attr("fill", "currentColor")
+    .text(`% ${d.label}`);
+  lx += label.node().getComputedTextLength() + 34;
+});
+
+// Year label
+gSvg.append("text")
+  .attr("x", 0).attr("y", 58 + barHeight / 2 + 5)
+  .attr("font-size", 13).attr("font-weight", "bold")
+  .attr("fill", "currentColor")
+  .text("2026");
+
+// Stacked bar
+let xOffset = margin.left;
+gallupData.forEach(d => {
+  const w = (d.pct / 100) * innerWidth;
+  gSvg.append("rect")
+    .attr("x", xOffset).attr("y", 58)
+    .attr("width", w).attr("height", barHeight)
+    .attr("fill", d.color);
+  gSvg.append("text")
+    .attr("x", xOffset + 8).attr("y", 58 + barHeight / 2 + 5)
+    .attr("font-size", 13).attr("font-weight", "bold")
+    .attr("fill", "white")
+    .text(d.pct);
+  xOffset += w;
+});
+
+// Caption
+gSvg.append("text")
+  .attr("x", 0).attr("y", gHeight - 2)
+  .attr("font-size", 10).attr("fill", "#888")
+  .text("Source: Gallup, March 2–18, 2026. \"No opinion\" percentage not shown. https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx");
+
+display(gSvg.node());
+```
 
 Public opinion reflects these concerns. As shown above, a substantial majority of respondents express opposition to having data centers built in their communities. While motivations vary, the pattern is clear. Many people are skeptical of the costs associated with data center development and are increasingly willing to voice those concerns.
 
