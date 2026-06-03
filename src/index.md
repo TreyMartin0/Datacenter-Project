@@ -96,13 +96,13 @@ Many residents view data centers as a source of concern rather than opportunity.
 <!-- Insert Vis 2 Here -->
 ```js
 const gallupData = [
-  { label: "Strongly favor",  pct: 7,  color: "d3.schemeCategory10[0]" },
-  { label: "Somewhat favor",  pct: 20, color: "d3.schemeCategory10[1]" },
-  { label: "Somewhat oppose", pct: 23, color: "d3.schemeCategory10[2]" },
-  { label: "Strongly oppose", pct: 48, color: "d3.schemeCategory10[3]" },
+  { label: "Strongly favor",  pct: 7,  color: d3.schemeCategory10[0] },
+  { label: "Somewhat favor",  pct: 20, color: d3.schemeCategory10[1] },
+  { label: "Somewhat oppose", pct: 23, color: d3.schemeCategory10[2] },
+  { label: "Strongly oppose", pct: 48, color: d3.schemeCategory10[3] },
 ];
 
-const gWidth = 700, gHeight = 120, barHeight = 44;
+const gWidth = 700, gHeight = 140, barHeight = 44;
 const margin = { left: 50, right: 20 };
 const innerWidth = gWidth - margin.left - margin.right;
 
@@ -112,18 +112,17 @@ const gSvg = d3.create("svg")
 
 // Legend
 const legend = gSvg.append("g").attr("transform", "translate(0, 10)");
-let lx = 0;
-gallupData.forEach(d => {
+const legendSpacing = [0, 140, 290, 455];
+gallupData.forEach((d, i) => {
   legend.append("rect")
-    .attr("x", lx).attr("y", 0)
+    .attr("x", legendSpacing[i]).attr("y", 0)
     .attr("width", 14).attr("height", 14)
     .attr("rx", 2).attr("fill", d.color);
-  const label = legend.append("text")
-    .attr("x", lx + 18).attr("y", 11)
-    .attr("font-size", 11)
+  legend.append("text")
+    .attr("x", legendSpacing[i] + 18).attr("y", 11)
+    .attr("font-size", 14)
     .attr("fill", "currentColor")
     .text(`% ${d.label}`);
-  lx += label.node().getComputedTextLength() + 34;
 });
 
 // Year label
@@ -151,9 +150,14 @@ gallupData.forEach(d => {
 
 // Caption
 gSvg.append("text")
-  .attr("x", 0).attr("y", gHeight - 2)
-  .attr("font-size", 10).attr("fill", "#888")
-  .text("Source: Gallup, March 2–18, 2026. \"No opinion\" percentage not shown. https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx");
+  .attr("x", 0).attr("y", gHeight - 20)
+  .attr("font-size", 15).attr("fill", "white")
+  .text("Source: Jones, J. M. (2026, May 13). Americans oppose AI data centers in their area. Gallup.");
+
+gSvg.append("text")
+  .attr("x", 0).attr("y", gHeight - 5)
+  .attr("font-size", 15).attr("fill", "white")
+  .text("https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx");
 
 display(gSvg.node());
 ```
@@ -724,6 +728,8 @@ FracTracker Alliance, National Data Centers Tracker. (datacenter2.csv) - https:/
 Frontier AI data center construction observations (datacenters3.csv) - https://epoch.ai/data/data-centers
 
 County boundary geometry — us-atlas (https://github.com/topojson/us-atlas)
+
+Data Center Opposition Survey Visualization - https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx
 
 Github Repository - https://github.com/TreyMartin0/Assignment5_CSC477
 
