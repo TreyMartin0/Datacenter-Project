@@ -96,9 +96,9 @@ Many residents view data centers as a source of concern rather than opportunity.
 <!-- Insert Vis 2 Here -->
 ```js
 const gallupData = [
-  { label: "Strongly favor",  pct: 7,  color: d3.schemeCategory10[0] },
-  { label: "Somewhat favor",  pct: 20, color: d3.schemeCategory10[1] },
-  { label: "Somewhat oppose", pct: 23, color: d3.schemeCategory10[2] },
+  { label: "Strongly favor",  pct: 7,  color: d3.schemeCategory10[2] },
+  { label: "Somewhat favor",  pct: 20, color: d3.schemeCategory10[0] },
+  { label: "Somewhat oppose", pct: 23, color: d3.schemeCategory10[1] },
   { label: "Strongly oppose", pct: 48, color: d3.schemeCategory10[3] },
 ];
 
@@ -134,18 +134,35 @@ gSvg.append("text")
 
 // Stacked bar
 let xOffset = margin.left;
-gallupData.forEach(d => {
+const barRects = [];
+
+gallupData.forEach((d, i) => {
   const w = (d.pct / 100) * innerWidth;
-  gSvg.append("rect")
+  const rect = gSvg.append("rect")
     .attr("x", xOffset).attr("y", 58)
     .attr("width", w).attr("height", barHeight)
-    .attr("fill", d.color);
+    .attr("fill", d.color)
+    .style("cursor", "pointer");
+  barRects.push(rect);
   gSvg.append("text")
     .attr("x", xOffset + 8).attr("y", 58 + barHeight / 2 + 5)
     .attr("font-size", 13).attr("font-weight", "bold")
     .attr("fill", "white")
     .text(d.pct);
   xOffset += w;
+});
+
+// Hover interactions
+barRects.forEach((rect, i) => {
+  rect
+    .on("mouseover", () => {
+      barRects.forEach((r, j) => {
+        r.attr("opacity", j === i ? 1 : 0.3);
+      });
+    })
+    .on("mouseout", () => {
+      barRects.forEach(r => r.attr("opacity", 1));
+    });
 });
 
 // Caption
