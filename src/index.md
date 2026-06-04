@@ -3,6 +3,93 @@
 Artificial intelligence has rapidly transformed from a niche technology into a major driver of economic investment. Behind every AI chatbot, image generator, and recommendation system is an enormous amount of computing infrastructure. As demand for AI continues to grow, so does the need for data centers.
 
 What was once an industry concentrated in a handful of technology hubs is now spreading across the country. Companies are proposing new facilities in urban areas, suburban communities, and rural regions alike, making data centers an increasingly visible part of the American landscape.
+
+<style>
+:root {
+  --dc-empty: #e8e8e8;
+  --dc-state-line: #aaa;
+  --dc-hover-line: #333;
+  --dc-select-line: #000;
+  --dc-map-state-bg: #f5f5f0;
+  --dc-card: #f7f7f7;
+  --dc-card-alt: #eeeeee;
+  --dc-border: #dddddd;
+  --dc-text-strong: #111111;
+  --dc-text-muted: #666666;
+  --dc-text-faint: #999999;
+  --dc-op-chip-bg: #e8e8e8;
+  --dc-op-chip-border: #cccccc;
+  --dc-op-chip-text: #222222;
+  --dc-pb-card: #fff5f5;
+  --dc-pb-border: #c92a2a;
+  --dc-pb-accent: #c92a2a;
+  --dc-pb-inner: #fdf0f0;
+  --dc-pb-inner-border: #e8b4b4;
+  --dc-pb-badge-bg: #ffe0e0;
+  --dc-pb-badge-border: #e8b4b4;
+  --dc-pb-badge-text: #c92a2a;
+  --dc-pb-link-petition: #c92a2a;
+  --dc-pb-link-group: #1971c2;
+  --dc-pb-link-news: #555555;
+  --dc-separator: #dddddd;
+  --dc-legend-text: #666666;
+  --dc-vl-text: #222222;
+  --dc-tooltip-bg: #ffffff;
+  --dc-tooltip-border: #cccccc;
+  --dc-tooltip-text: #222222;
+  --dc-boundary-fill: #1a1a1a;
+  --dc-boundary-stroke: #888888;
+  --dc-size-line: #555555;
+  --dc-btn-bg: #e8e8e8;
+  --dc-btn-text: #111111;
+  --dc-btn-border: #cccccc;
+  --dc-btn-active-bg: #1976d2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dc-empty: #2d2d2d;
+    --dc-state-line: #666666;
+    --dc-hover-line: #bbbbbb;
+    --dc-select-line: #ffffff;
+    --dc-map-state-bg: #2a2a2a;
+    --dc-card: #0d0d0d;
+    --dc-card-alt: #111111;
+    --dc-border: #2a2a2a;
+    --dc-text-strong: #ffffff;
+    --dc-text-muted: #aaaaaa;
+    --dc-text-faint: #666666;
+    --dc-op-chip-bg: #1a1a1a;
+    --dc-op-chip-border: #333333;
+    --dc-op-chip-text: #e8e8e8;
+    --dc-pb-card: #1a0505;
+    --dc-pb-border: #c92a2a;
+    --dc-pb-accent: #ff6b6b;
+    --dc-pb-inner: #120808;
+    --dc-pb-inner-border: #3a1010;
+    --dc-pb-badge-bg: #1e0c0c;
+    --dc-pb-badge-border: #5c2020;
+    --dc-pb-badge-text: #ffb3b3;
+    --dc-pb-link-petition: #ff8787;
+    --dc-pb-link-group: #74c0fc;
+    --dc-pb-link-news: #adb5bd;
+    --dc-separator: #333333;
+    --dc-legend-text: #aaaaaa;
+    --dc-vl-text: #ffffff;
+    --dc-tooltip-bg: #1a1a1a;
+    --dc-tooltip-border: #444444;
+    --dc-tooltip-text: #e8e8e8;
+    --dc-boundary-fill: #f8f8f8;
+    --dc-boundary-stroke: #555555;
+    --dc-size-line: #aaaaaa;
+    --dc-btn-bg: #2a2a2a;
+    --dc-btn-text: #e8e8e8;
+    --dc-btn-border: #444444;
+    --dc-btn-active-bg: #1976d2;
+  }
+}
+</style>
+
 ```js
 
 const vl = vegaLiteApi.register(vega, vegaLite);
@@ -10,12 +97,20 @@ const vl = vegaLiteApi.register(vega, vegaLite);
 import * as vega from "npm:vega";
 import * as vegaLite from "npm:vega-lite";
 import * as vegaLiteApi from "npm:vega-lite-api";
-import * as aq from "npm:arquero";
 import JSZip from "npm:jszip";
 import * as topojson from "npm:topojson-client";
 
 
 
+```
+
+```js
+// Reactive dark-mode signal — any cell that references darkMode will re-render on OS theme change
+const darkMode = Generators.observe(notify => {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  notify(mq.matches);
+  mq.addEventListener("change", (e) => notify(e.matches));
+});
 ```
 
 ```js
@@ -37,8 +132,11 @@ const facilitiesShown = showProposed
 ```
 
 ```js
+const _vlStateBg = darkMode ? "#f5f5f0" : "#2a2a2a";
+const _vlText    = darkMode ? "#ffffff" : "#222222";
+
 const chart = vl.layer(
-  vl.markGeoshape({ fill: "#f5f5f0", stroke: "#bbb", strokeWidth: 0.5 })
+  vl.markGeoshape({ fill: _vlStateBg, stroke: "#bbb", strokeWidth: 0.5 })
     .data(vl.topojson(usTopo).feature("states")),
   vl.markCircle({ opacity: 0.8, stroke: "white", strokeWidth: 0.6 })
     .data(facilitiesShown)
@@ -69,9 +167,9 @@ const chart = vl.layer(
   .width(885).height(560)
   .background("transparent")
   .config({
-    legend: { labelColor: "#fff", titleColor: "#fff" }
+    legend: { labelColor: _vlText, titleColor: _vlText }
   })
-  .title({ text: "U.S. Data Centers", color: "#fff", fontSize: 24 });
+  .title({ text: "U.S. Data Centers", color: _vlText, fontSize: 24 });
 
 display(await chart.render());
 ```
@@ -86,9 +184,9 @@ display(html`<button
     font-size: 1.05em;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: #fff;
-    background: ${showProposed ? "#dd831b" : "#333"};
-    border: 2px solid ${showProposed ? "#f08f20" : "#555"};
+    color: ${showProposed ? "#fff" : "var(--dc-btn-text)"};
+    background: ${showProposed ? "#dd831b" : "var(--dc-btn-bg)"};
+    border: 2px solid ${showProposed ? "#f08f20" : "var(--dc-btn-border)"};
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -101,7 +199,6 @@ However, the expansion of data centers has not been universally welcomed.
 
 Many residents view data centers as a source of concern rather than opportunity. Critics point to the large amounts of electricity and water these facilities consume, their potential environmental impacts, and the strain they can place on local infrastructure. Others question whether communities should bear these costs in order to support technologies that primarily benefit large corporations. Concerns about artificial intelligence itself, including its societal impacts, labor implications, and energy consumption, have further fueled opposition.
 
-<!-- Insert Vis 2 Here -->
 ```js
 const gallupData = [
   { label: "Strongly favor",  pct: 7,  color: d3.schemeCategory10[2] },
@@ -176,12 +273,12 @@ barRects.forEach((rect, i) => {
 // Caption
 gSvg.append("text")
   .attr("x", 0).attr("y", gHeight - 20)
-  .attr("font-size", 15).attr("fill", "white")
+  .attr("font-size", 15).attr("fill", "currentColor")
   .text("Source: Jones, J. M. (2026, May 13). Americans oppose AI data centers in their area. Gallup.");
 
 gSvg.append("text")
   .attr("x", 0).attr("y", gHeight - 5)
-  .attr("font-size", 15).attr("fill", "white")
+  .attr("font-size", 15).attr("fill", "currentColor")
   .text("https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx");
 
 display(gSvg.node());
@@ -193,8 +290,6 @@ The question, then, is whether that opposition actually matters.
 
 Developers and technology companies often possess significant financial resources and political influence, which can make large infrastructure projects appear inevitable. Yet local communities have more power than they may realize. Public meetings, community organizing, advocacy groups, and local government decisions can all affect the outcome of proposed developments.
 
-<!-- Insert Vis 3 Here -->
-
 The final map highlights locations where proposed data centers have faced pushback, alongside projects that were ultimately canceled. It becomes apparent that areas that experienced substantial public pushback frequently overlap with locations where projects were later canceled.
 
 While community opposition is not the sole factor behind every cancellation, the relationship is difficult to ignore. Public pressure can influence local officials, affect permitting decisions, generate media attention, and increase the costs and risks associated with development. In many cases, organized residents have successfully altered or halted projects that once appeared certain to move forward.
@@ -204,15 +299,6 @@ As demand for AI infrastructure continues to grow, conflicts over data center de
 The story of data centers is therefore not just a story about technology. It is also a story about civic participation. As communities confront the opportunities and challenges of the AI era, public engagement can play an important part in affecting what gets built, where it gets built, and whether it gets built at all.
 
 ---
-
-# Mapping the Data Center Buildout
-
-Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure. Then, scroll down to see where datacenters are located in that county compared with population centers.
-
-# Mapping the Data Center Buildout
-
-Where is the data center buildout concentrating, who is building it, and where are communities pushing back? This visualization maps 1,505 U.S. data center facilities by the county that hosts them, colored by your choice of buildout measure. Then, scroll down to see where datacenters are laid out within the currently selected county.
-
 
 ```js
 
@@ -238,7 +324,6 @@ const selectedState = {
   updateSelectionOutline: null
 };
 
-const allFacilities = counties.flatMap(c => c.facilities);
 const medSqft = d3.median(counties.flatMap(c => c.facilities), d => d.sqft);
 
 let zipCache = null;
@@ -282,8 +367,9 @@ const metrics = [
   { key: "homeValue", label: "Median home value", census: "B25077_001E", format: d3.format("$,") },
   { key: "population", label: "Population", census: "B01003_001E", format: d3.format(",") }
 ]
+```
 
-
+```js
 // Collect non-zero values for the active measure to set the color scale domain
 const measureValues = counties.map((c) => c[measure]).filter((v) => v > 0);
 // Cancelled uses a flat binary color instead of a gradient scale
@@ -304,7 +390,7 @@ const legendNode = (() => {
     // Single colored square + label for the binary cancelled view
     svg.attr("width", 180);
     svg.append("rect").attr("x", 0).attr("y", 0).attr("width", 14).attr("height", 14).attr("rx", 3).attr("fill", cancelledColor);
-    svg.append("text").attr("x", 20).attr("y", 11).attr("font-size", 11).attr("fill", "#aaa").text("Has cancelled facilities");
+    svg.append("text").attr("x", 20).attr("y", 11).attr("font-size", 11).attr("fill", "currentColor").text("Has cancelled facilities");
   } else {
     // Gradient bar from low (yellow) to high (dark red) with labeled endpoints
     const w = 240, h = 12;
@@ -314,8 +400,8 @@ const legendNode = (() => {
       grad.append("stop").attr("offset", `${t * 100}%`).attr("stop-color", d3.interpolateYlOrRd(t));
     });
     svg.append("rect").attr("x", 0).attr("y", 0).attr("width", w).attr("height", h).attr("fill", "url(#leg-grad)");
-    svg.append("text").attr("x", 0).attr("y", h + 14).attr("font-size", 11).attr("fill", "#aaa").text("low");
-    svg.append("text").attr("x", w).attr("y", h + 14).attr("font-size", 11).attr("fill", "#aaa").attr("text-anchor", "end").text(`high (max ${maxVal.toLocaleString()})`);
+    svg.append("text").attr("x", 0).attr("y", h + 14).attr("font-size", 11).attr("fill", "currentColor").text("low");
+    svg.append("text").attr("x", w).attr("y", h + 14).attr("font-size", 11).attr("fill", "currentColor").attr("text-anchor", "end").text(`high (max ${maxVal.toLocaleString()})`);
   }
   return svg.node();
 })();
@@ -324,6 +410,11 @@ display(legendNode);
 
 ```js
 // Standard Albers USA canvas size matching the us-atlas projection
+const _emptyFill  = darkMode ? "#e8e8e8" : "#2d2d2d";
+const _stateLine  = darkMode ? "#aaaaaa" : "#666666";
+const _hoverLine  = darkMode ? "#333333" : "#bbbbbb";
+const _selectLine = darkMode ? "#000000" : "#ffffff";
+
 const width = 975;
 const height = 610;
 // Albers USA projection
@@ -338,7 +429,9 @@ const selected = selectedState.fips ? countyByFips.get(selectedState.fips) : nul
 const svg = d3.create("svg")
   .attr("viewBox", [0, 0, width, height])
   .attr("width", width)
-  .attr("style", "max-width: 100%; height: auto; cursor: pointer;");
+  .attr("style", "max-width: 100%; height: auto;");
+
+let hoverPath;
 
 // Draw one path per county, colored by the active measure
 svg.append("g")
@@ -349,19 +442,33 @@ svg.append("g")
     .attr("fill", (d) => {
       const rec = countyByFips.get(String(d.id).padStart(5, "0"));
       const v = rec ? rec[measure] : 0;
-      // Counties with no data get a neutral gray fill
-      if (v <= 0) return "#f0f0f0";
+      // Counties with no data get a neutral fill
+      if (v <= 0) return _emptyFill;
       // Cancelled uses a flat red
       return isBinary ? cancelledColor : color(v);
     })
     .attr("stroke", "#fff")
     .attr("stroke-width", 0.2)
+    .style("cursor", (d) => {
+      const rec = countyByFips.get(String(d.id).padStart(5, "0"));
+      return (rec && rec[measure] > 0) ? "pointer" : "default";
+    })
+    .on("mouseover", (event, d) => {
+      const fips = String(d.id).padStart(5, "0");
+      const rec = countyByFips.get(fips);
+      if (!rec || rec[measure] <= 0) return;
+      if (selectedState.fips === fips) return;
+      hoverPath?.datum(d).attr("d", path);
+    })
+    .on("mouseout", () => hoverPath?.attr("d", null))
     .on("click", async (event, d) => {
       const fips = String(d.id).padStart(5, "0");
       const rec = countyByFips.get(fips);
+      const v = rec ? rec[measure] : 0;
 
-      if (!rec || rec.total === 0) return;
+      if (v <= 0) return;
 
+      hoverPath?.attr("d", null);
       await setSelected(
         selectedState.fips === fips ? null : fips
       );
@@ -370,7 +477,8 @@ svg.append("g")
       // Native browser tooltip shown on hover
       .text((d) => {
         const rec = countyByFips.get(String(d.id).padStart(5, "0"));
-        if (!rec || rec.total === 0) return "";
+        const v = rec ? rec[measure] : 0;
+        if (v <= 0) return "";
         return `${rec.name}\n${rec.total} facilities · ${rec.mwTotal.toLocaleString()} MW\n${rec.pushbackCount > 0 ? `${rec.pushbackCount} with community pushback` : "no recorded pushback"}`;
       });
 
@@ -381,32 +489,40 @@ svg.append("g")
       .datum(countyFeatures.find(d => String(d.id).padStart(5, "0") === selectedState.fips))
       .attr("class", "selected-county")
       .attr("fill", "none")
-      .attr("stroke", "#000")
+      .attr("stroke", _selectLine)
       .attr("stroke-width", 2.5)
       .attr("d", path);
   }
 }
 selectedState.updateSelectionOutline = updateSelectionOutline;
 
-  // Draw a black outline around the selected county on top of the fill layer
+  // Draw outline around the selected county on top of the fill layer
   if (selected) {
     svg.append("path")
         .datum(countyFeatures.find((d) => String(d.id).padStart(5, "0") === selected.fips))
         .attr("class", "selected-county")
         .attr("fill", "none")
-        .attr("stroke", "#000")
+        .attr("stroke", _selectLine)
         .attr("stroke-width", 2.5)
         .attr("d", path);
   }
 
-// Draw white state border lines on top of county fills
+// Draw state border lines on top of county fills
 svg.append("path")
     .datum(stateMesh)
     .attr("fill", "none")
-    .attr("stroke", "#fff")
+    .attr("stroke", _stateLine)
     .attr("stroke-width", 0.7)
     .attr("stroke-linejoin", "round")
     .attr("d", path);
+
+// Hover outline — rendered above state borders, below the selection outline
+hoverPath = svg.append("path")
+    .attr("class", "hover-county")
+    .attr("fill", "none")
+    .attr("stroke", _hoverLine)
+    .attr("stroke-width", 1.5)
+    .attr("pointer-events", "none");
 
 display(svg.node());
 
@@ -473,7 +589,7 @@ function renderCountyDetails() {
 
   if (!selected) {
     countyDetails.append(html`
-      <p style="color:#888;">
+      <p style="color:var(--dc-text-muted);">
         <em>Hover any colored county for a quick read. Click a county to see operators and the spotlight facility.</em>
       </p>
     `);
@@ -488,31 +604,31 @@ function renderCountyDetails() {
   countyDetails.append(html`
     <div style="margin-top: 1em;">
       <h2 style="margin: 0;">${selected.name}</h2>
-      <p style="margin: 4px 0 14px 0; color:#aaa; font-size:0.95em;">
-        <strong style="color:#fff;">${selected.total}</strong> facilities ·
-        <strong style="color:#fff;">${selected.mwTotal.toLocaleString()} MW</strong> ·
+      <p style="margin: 4px 0 14px 0; color:var(--dc-text-muted); font-size:0.95em;">
+        <strong style="color:var(--dc-text-strong);">${selected.total}</strong> facilities ·
+        <strong style="color:var(--dc-text-strong);">${selected.mwTotal.toLocaleString()} MW</strong> ·
         ${selected.operating} operating ·
         ${selected.proposed} proposed ·
         ${selected.pushbackCount > 0
-          ? html`<strong style="color:#ff6b6b;">${selected.pushbackCount} with community pushback</strong>`
-          : html`<span style="color:#666;">no recorded pushback</span>`}
+          ? html`<strong style="color:var(--dc-pb-accent);">${selected.pushbackCount} with community pushback</strong>`
+          : html`<span style="color:var(--dc-text-faint);">no recorded pushback</span>`}
       </p>
 
       <div style="margin-bottom: 16px;">
-        <div style="font-size:0.8em; color:#888; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Top operators in this county</div>
+        <div style="font-size:0.8em; color:var(--dc-text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Top operators in this county</div>
         ${ops.map((o) => html`
-          <span style="display:inline-block; padding:4px 10px; margin:0 6px 6px 0; background:#1a1a1a; border:1px solid #333; border-radius:14px; font-size:0.85em; color:#e8e8e8;">
-            <strong style="color:#fff;">${o.name}</strong><span style="color:#888;"> · ${o.count}</span>
+          <span style="display:inline-block; padding:4px 10px; margin:0 6px 6px 0; background:var(--dc-op-chip-bg); border:1px solid var(--dc-op-chip-border); border-radius:14px; font-size:0.85em; color:var(--dc-op-chip-text);">
+            <strong style="color:var(--dc-text-strong);">${o.name}</strong><span style="color:var(--dc-text-muted);"> · ${o.count}</span>
           </span>
         `)}
-        ${unknownGroup ? html`<span style="color:#666; font-size:0.85em; margin-left:4px;">+ ${unknownGroup.count} unknown</span>` : ""}
-        ${namedCount > 6 ? html`<span style="color:#666; font-size:0.85em; margin-left:8px;">+ ${namedCount - 6} more</span>` : ""}
+        ${unknownGroup ? html`<span style="color:var(--dc-text-faint); font-size:0.85em; margin-left:4px;">+ ${unknownGroup.count} unknown</span>` : ""}
+        ${namedCount > 6 ? html`<span style="color:var(--dc-text-faint); font-size:0.85em; margin-left:8px;">+ ${namedCount - 6} more</span>` : ""}
       </div>
 
       ${sp ? html`
-        <div style="border:1px solid ${sp.pushback ? "#c92a2a" : "#2a2a2a"}; border-radius:8px; overflow:hidden; background:#0d0d0d;">
-          <div style="padding:10px 16px; background:${sp.pushback ? "#1a0505" : "#111"}; border-bottom:1px solid ${sp.pushback ? "#c92a2a" : "#222"}; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <span style="font-size:0.7em; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:${sp.pushback ? "#ff6b6b" : "#666"};">
+        <div style="border:1px solid ${sp.pushback ? "var(--dc-pb-border)" : "var(--dc-border)"}; border-radius:8px; overflow:hidden; background:var(--dc-card);">
+          <div style="padding:10px 16px; background:${sp.pushback ? "var(--dc-pb-card)" : "var(--dc-card-alt)"}; border-bottom:1px solid ${sp.pushback ? "var(--dc-pb-border)" : "var(--dc-border)"}; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span style="font-size:0.7em; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:${sp.pushback ? "var(--dc-pb-accent)" : "var(--dc-text-faint)"};">
               ${sp.pushback ? "★ " : ""}${measureMeta[measure]?.label ?? "Spotlight"}
             </span>
             ${statusBadge(sp.status)}
@@ -520,52 +636,52 @@ function renderCountyDetails() {
 
           <div style="padding:14px 16px 10px;">
             <h3 style="margin:0 0 6px 0; font-size:1.1em;">${sp.name || "Unnamed facility"}</h3>
-            <div style="color:#999; font-size:0.88em; line-height:1.8;">
+            <div style="color:var(--dc-text-muted); font-size:0.88em; line-height:1.8;">
               ${[
-                sp.operator ? html`<span style="color:#ccc;">${sp.operator}</span>` : null,
+                sp.operator ? html`<span style="color:var(--dc-text-muted);">${sp.operator}</span>` : null,
                 sp.sizeRank ? html`<span>${sp.sizeRank}</span>` : null,
-                sp.mw ? html`<span><strong style="color:#fff;">${fmtMW(sp.mw)}</strong></span>` : null,
+                sp.mw ? html`<span><strong style="color:var(--dc-text-strong);">${fmtMW(sp.mw)}</strong></span>` : null,
                 sp.acres ? html`<span>${fmtAcres(sp.acres)}</span>` : null,
                 sp.projectCost ? html`<span>${sp.projectCost}</span>` : null,
                 sp.powerSource ? html`<span>Power: ${sp.powerSource}</span>` : null,
                 sp.expectedOnline ? html`<span>Online: ${sp.expectedOnline}</span>` : null,
               ].filter(Boolean).reduce((acc, el, i) =>
-                i === 0 ? [el] : [...acc, html`<span style="color:#444;"> · </span>`, el], []
+                i === 0 ? [el] : [...acc, html`<span style="color:var(--dc-separator);"> · </span>`, el], []
               )}
             </div>
           </div>
 
           ${sp.pushback ? html`
-            <div style="margin:0 16px 14px; padding:12px 14px; background:#120808; border:1px solid #3a1010; border-radius:6px;">
-              <div style="font-size:0.7em; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#ff6b6b; margin-bottom:10px;">Community resistance</div>
+            <div style="margin:0 16px 14px; padding:12px 14px; background:var(--dc-pb-inner); border:1px solid var(--dc-pb-inner-border); border-radius:6px;">
+              <div style="font-size:0.7em; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--dc-pb-accent); margin-bottom:10px;">Community resistance</div>
 
-              ${sp.advocacyInfo ? html`<p style="margin:0 0 10px 0; color:#e0e0e0; font-size:0.92em; line-height:1.6;">${sp.advocacyInfo}</p>` : ""}
-              ${sp.otherInfo ? html`<p style="margin:0 0 10px 0; color:#bbb; font-size:0.87em; line-height:1.6; font-style:italic;">${sp.otherInfo}</p>` : ""}
+              ${sp.advocacyInfo ? html`<p style="margin:0 0 10px 0; font-size:0.92em; line-height:1.6;">${sp.advocacyInfo}</p>` : ""}
+              ${sp.otherInfo ? html`<p style="margin:0 0 10px 0; color:var(--dc-text-muted); font-size:0.87em; line-height:1.6; font-style:italic;">${sp.otherInfo}</p>` : ""}
 
               ${(sp.resistanceStatus || sp.nda) ? html`
                 <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                   ${sp.resistanceStatus ? html`
-                    <span style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; background:#1e0c0c; border:1px solid #5c2020; border-radius:12px; font-size:0.82em; color:#ffb3b3;">
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; background:var(--dc-pb-badge-bg); border:1px solid var(--dc-pb-badge-border); border-radius:12px; font-size:0.82em; color:var(--dc-pb-badge-text);">
                       <strong>Status:</strong> ${sp.resistanceStatus}
                     </span>` : ""}
                   ${sp.nda ? html`
-                    <span style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; background:#1e0c0c; border:1px solid #5c2020; border-radius:12px; font-size:0.82em; color:#ffb3b3;">
+                    <span style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; background:var(--dc-pb-badge-bg); border:1px solid var(--dc-pb-badge-border); border-radius:12px; font-size:0.82em; color:var(--dc-pb-badge-text);">
                       <strong>NDA:</strong> ${sp.nda}
                     </span>` : ""}
                 </div>
               ` : ""}
 
               ${(sp.petitionUrl || sp.communityGroupUrl1 || sp.communityGroupUrl2 || (sp.sources && sp.sources.length)) ? html`
-                <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.85em; padding-top:8px; border-top:1px solid #2a1010;">
-                  ${sp.petitionUrl ? html`<a href="${sp.petitionUrl}" target="_blank" style="color:#ff8787; text-decoration:none;">✍ Petition</a>` : ""}
-                  ${sp.communityGroupUrl1 ? html`<a href="${sp.communityGroupUrl1}" target="_blank" style="color:#74c0fc; text-decoration:none;">Community group →</a>` : ""}
-                  ${sp.communityGroupUrl2 ? html`<a href="${sp.communityGroupUrl2}" target="_blank" style="color:#74c0fc; text-decoration:none;">Community group 2 →</a>` : ""}
-                  ${sp.sources?.slice(0, 3).map((u, i) => html`<a href="${u}" target="_blank" style="color:#adb5bd; text-decoration:none;">News ${i + 1} →</a>`)}
+                <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.85em; padding-top:8px; border-top:1px solid var(--dc-pb-inner-border);">
+                  ${sp.petitionUrl ? html`<a href="${sp.petitionUrl}" target="_blank" style="color:var(--dc-pb-link-petition); text-decoration:none;">✍ Petition</a>` : ""}
+                  ${sp.communityGroupUrl1 ? html`<a href="${sp.communityGroupUrl1}" target="_blank" style="color:var(--dc-pb-link-group); text-decoration:none;">Community group →</a>` : ""}
+                  ${sp.communityGroupUrl2 ? html`<a href="${sp.communityGroupUrl2}" target="_blank" style="color:var(--dc-pb-link-group); text-decoration:none;">Community group 2 →</a>` : ""}
+                  ${sp.sources?.slice(0, 3).map((u, i) => html`<a href="${u}" target="_blank" style="color:var(--dc-pb-link-news); text-decoration:none;">News ${i + 1} →</a>`)}
                 </div>
               ` : ""}
             </div>
           ` : sp.otherInfo ? html`
-            <p style="margin:0 16px 14px; color:#888; font-size:0.87em; line-height:1.6;">${sp.otherInfo}</p>
+            <p style="margin:0 16px 14px; color:var(--dc-text-muted); font-size:0.87em; line-height:1.6;">${sp.otherInfo}</p>
           ` : ""}
         </div>
       ` : ""}
@@ -577,10 +693,6 @@ selectedState.renderCountyDetails = renderCountyDetails;
 renderCountyDetails();
 
 display(countyDetails);
-
-import * as aq from "npm:arquero";
-
-const {op} = aq;
 
 const statusPalette = {
   pushback: "#c92a2a",
@@ -620,11 +732,17 @@ function facilityMatchesMeasure(d, measure) {
 }
 
 const mapView = (() => {
+  // Reference darkMode so this IIFE re-runs on every theme change
+  const _btnBg     = darkMode ? "#2a2a2a" : "#e8e8e8";
+  const _btnText   = darkMode ? "#e8e8e8" : "#111111";
+  const _btnBorder = darkMode ? "#444444" : "#cccccc";
+  const _boundaryFill   = darkMode ? "#f8f8f8" : "#1a1a1a";
+  const _boundaryStroke = darkMode ? "#555555" : "#888888";
+  const _sizeLine  = darkMode ? "#aaaaaa" : "#555555";
+
   // --- State ---
   
   let metricIndex = 0;
-  let showProposed = false;
-  let currentScale = 1;
 
   // --- Container ---
   const container = html`<div style="font-family: sans-serif;margin-top:12px;">
@@ -632,7 +750,7 @@ const mapView = (() => {
 
   <svg id="map" width="1200" height="550"></svg>
 
-  <div id="tooltip" style="position:fixed; background:#fff; border:1px solid #ccc; 
+  <div id="tooltip" style="position:fixed; background:var(--dc-tooltip-bg); border:1px solid var(--dc-tooltip-border); color:var(--dc-tooltip-text);
     padding:6px 10px; border-radius:4px; font-size:13px; pointer-events:none; opacity:0;"></div>
 </div>`;
 
@@ -688,7 +806,6 @@ selectedState.renderLocal = renderLocal;
     svg.selectAll(".boundary").remove();
     svg.selectAll(".dc").remove();
     svg.selectAll(".legend").remove();
-    svg.selectAll(".county-empty").remove();
     tooltip.style("opacity", 0);
 
     const metric = metrics[metricIndex];
@@ -698,10 +815,12 @@ selectedState.renderLocal = renderLocal;
         btn.style.background = "#1976d2";
         btn.style.color = "white";
         btn.style.fontWeight = "bold";
+        btn.style.border = "1px solid #1976d2";
       } else {
-        btn.style.background = "";
-        btn.style.color = "";
+        btn.style.background = _btnBg;
+        btn.style.color = _btnText;
         btn.style.fontWeight = "";
+        btn.style.border = `1px solid ${_btnBorder}`;
       }
     });
 
@@ -724,34 +843,31 @@ selectedState.renderLocal = renderLocal;
 
 
     const operatingDcs = selectedCountyRecord.facilities
-      .filter(d =>
-        d.lat != null &&
-        d.lon != null //&&
-        //d.status?.toLowerCase().includes("operating")
-      );
+      .filter(d => d.lat != null && d.lon != null);
 
-    const sqftValues = operatingDcs.map(d => d.sqft).filter(v => v != null && v > 0);
     const sqft = d => (d.sqft == null || d.sqft === 0) ? medSqft : d.sqft;
 
-
-    //svg.selectAll("*").remove();
 
     const projection = d3.geoMercator()
       .fitSize([900, 550], boundary);
 
     const path = d3.geoPath(projection);
 
-    const outOfBounds = dcs.filter(d => projection([d.lon, d.lat]) == null);
-      console.log("out of bounds:", outOfBounds.length, outOfBounds.map(d => d.name));
-      console.log("medianSqft:", medSqft, "sqftValues:", sqftValues);
-    console.log("dcs:", dcs.length, "operatingDcs:", operatingDcs.length);
-
-
     // --- Color scale ---
     const values = towns.features.map(f => f.properties[metric.key]).filter(v => v != null);
     const colorScale = d3.scaleSequential()
       .domain(d3.extent(values))
       .interpolator(d3.interpolateBlues);
+
+    // --- Legend panel background ---
+    svg.append("rect")
+      .attr("class", "legend")
+      .attr("x", 893).attr("y", 18)
+      .attr("width", 295).attr("height", 515)
+      .attr("fill", darkMode ? "rgba(18,18,18,0.88)" : "rgba(248,248,248,0.92)")
+      .attr("stroke", darkMode ? "#444" : "#ccc")
+      .attr("stroke-width", 1)
+      .attr("rx", 6);
 
     // --- Vertical Legend for chloropleth---
     const legendWidth = 18;
@@ -761,12 +877,9 @@ selectedState.renderLocal = renderLocal;
       .attr("class", "legend")
       .attr("transform", "translate(900, 40)");
     
-    const legendId = `legend-gradient-${selectedState.fips}-${metricIndex}`;
-    
-    const defs = svg.append("defs");
-    
+    defs.select("#legend-choropleth-grad").remove();
     const gradient = defs.append("linearGradient")
-      .attr("id", legendId)
+      .attr("id", "legend-choropleth-grad")
       .attr("x1", "0%")
       .attr("y1", "100%")
       .attr("x2", "0%")
@@ -786,8 +899,8 @@ selectedState.renderLocal = renderLocal;
     legend.append("rect")
       .attr("width", legendWidth)
       .attr("height", legendHeight)
-      .attr("fill", `url(#${legendId})`)
-      .attr("stroke", "#999");
+      .attr("fill", "url(#legend-choropleth-grad)")
+      .attr("stroke", _sizeLine);
     
     const legendScale = d3.scaleLinear()
       .domain(colorScale.domain())
@@ -799,13 +912,18 @@ selectedState.renderLocal = renderLocal;
         d3.axisRight(legendScale)
           .ticks(5)
           .tickFormat(metric.format ?? d3.format(","))
-      );
+      )
+      .call(g => {
+        g.selectAll("text").attr("fill", "currentColor");
+        g.selectAll(".domain, .tick line").attr("stroke", "currentColor");
+      });
     
     legend.append("text")
       .attr("x", 0)
       .attr("y", -12)
       .attr("font-size", 12)
       .attr("font-weight", "bold")
+      .attr("fill", "currentColor")
       .text(metric.label);
 
     // --- Datacenter Size Legend ---
@@ -825,6 +943,7 @@ selectedState.renderLocal = renderLocal;
       .attr("y", -15)
       .attr("font-size", 12)
       .attr("font-weight", "bold")
+      .attr("fill", "currentColor")
       .text("Datacenter Size");
     
     const maxR = sqftScale(d3.max(sizeLegendValues));
@@ -838,19 +957,20 @@ selectedState.renderLocal = renderLocal;
         .attr("cy", y)
         .attr("r", r)
         .attr("fill", "none")
-        .attr("stroke", "#333");
+        .attr("stroke", _sizeLine);
     
       sizeLegend.append("line")
         .attr("x1", r * 2)
         .attr("x2", r * 2 + 30)
         .attr("y1", y)
         .attr("y2", y)
-        .attr("stroke", "#333");
+        .attr("stroke", _sizeLine);
     
       sizeLegend.append("text")
         .attr("x", r * 2 + 35)
         .attr("y", y + 4)
         .attr("font-size", 11)
+        .attr("fill", "currentColor")
         .text(`${d3.format(",")(value)} sqft`);
     });
 
@@ -872,6 +992,7 @@ selectedState.renderLocal = renderLocal;
       .attr("y", -12)
       .attr("font-size", 12)
       .attr("font-weight", "bold")
+      .attr("fill", "currentColor")
       .text("Facility Status");
 
     statusLegendItems.forEach(([key, label], i) => {
@@ -882,13 +1003,14 @@ selectedState.renderLocal = renderLocal;
         .attr("cy", y)
         .attr("r", 6)
         .attr("fill", statusPalette[key])
-        .attr("stroke", "#fff")
+        .attr("stroke", darkMode ? "#222" : "#fff")
         .attr("stroke-width", 1);
 
       statusLegend.append("text")
         .attr("x", 20)
         .attr("y", y + 4)
         .attr("font-size", 11)
+        .attr("fill", "currentColor")
         .text(label);
     });
 
@@ -898,13 +1020,14 @@ selectedState.renderLocal = renderLocal;
       .attr("transform", `translate(7, ${pushbackY})`)
       .attr("d", d3.symbol().type(d3.symbolStar).size(110)())
       .attr("fill", "#ffd43b")
-      .attr("stroke", "#000")
+      .attr("stroke", darkMode ? "#222" : "#000")
       .attr("stroke-width", 0.8);
 
     statusLegend.append("text")
       .attr("x", 20)
       .attr("y", pushbackY + 4)
       .attr("font-size", 11)
+      .attr("fill", "currentColor")
       .text("Community pushback");
 
     // --- County boundary layer ---
@@ -913,8 +1036,8 @@ selectedState.renderLocal = renderLocal;
       .join("path")
       .attr("class", "boundary")
       .attr("d", path)
-      .attr("fill", "white")
-      .attr("stroke", "#333")
+      .attr("fill", _boundaryFill)
+      .attr("stroke", _boundaryStroke)
       .attr("stroke-width", 2)
       .style("pointer-events", "none");
 
@@ -928,7 +1051,7 @@ selectedState.renderLocal = renderLocal;
         const v = d.properties[metric.key];
         return (v != null && v > 0) ? colorScale(v) : "url(#no-data-pattern)";
       })
-      .attr("stroke", "#999")
+      .attr("stroke", _sizeLine)
       .attr("stroke-width", 0.5)
       .on("mousemove", (event, d) => {
           const value = d.properties[metric.key];
@@ -988,7 +1111,7 @@ selectedState.renderLocal = renderLocal;
             Operator: ${d.operator ?? "Unknown"}<br>
             Size: ${d.sqft != null ? d.sqft.toLocaleString() + " sqft" : "Unknown"}
             ${d.pushback ? `
-              <hr style="border:none; border-top:1px solid #ddd; margin:6px 0;">
+              <hr style="border:none; border-top:1px solid var(--dc-separator); margin:6px 0;">
               <strong>Community pushback</strong><br>
               ${d.resistanceStatus ? `Resistance status: ${d.resistanceStatus}<br>` : ""}
               ${d.nda ? `NDA: ${d.nda}<br>` : ""}
@@ -1009,20 +1132,6 @@ selectedState.renderLocal = renderLocal;
 display(mapView);
 ```
 
-## Design Rationale
-
-I first began this assignment with a different focus: do data center counties grow economically differently from their neighbors. After making a version of this, I found that my data had too little information to make any claims about my findings. Rather than making a claim I couldn't defend honestly, I decided to move to a more concrete question: where is the buildout happening, who is running it, and where are communities pushing back? I chose this so that every measure is a counted fact and not an inferred effect.
-
-The quesiton I ask is pretty spatial, so I decide to go with a choropleth as my view. Counties were colored on a sequential ramp with a logarithmic scale. I made this decision because some counties, like Loudoun, VA and Pike, OH dominate the distribution and would saturate a linear scale. The zero-value counties were rendered light gray to seperate them from the counties with low facility counts.
-
-The radio button toggle is a main interaction. They allow the viewer to switch between total facilities, total megawatts, proposed, operating, cancelled, and community pushback turn othe map into six views and shows interesting comparisons in the data. For example, the densest counties are not alwasy the largest in raw power, and the pushback hotspots are in a different geography from facilties count hotspots.
-
-The click-to-detail panel saw various iterations. My early version lsited every facility as a table row, which would overwhelm the viewer for big counties. I tried collapsing by faciltiy name, but found duplicated that were actually distinct facilites at different addresses sharing a project name. The final verison I landed on was groups by operator and using a spotlight card to give one facility deep treatment rather than spreading attention across many.
-
-The pushback field also saw some iteration. The "pushback count" alone was abstract and didn't give a viewer any information as to why. The dataset also didn't have a "reason" field, but does include evidence fields: advocacy descriptions, resistance status, NDA flags, petition URLs, and news sources. The spotlight card displays these when present.
-
-Encoding channels are kept seperate: color encodes the chosen measure, a black outline marks the selected county, and the detail panel uses a categorical palette for status.
-
 ## References / Data Sources
 
 U.S data center facility records (data_centers.csv) - https://data.msdlive.org/records/65g71-a4731
@@ -1035,6 +1144,4 @@ County boundary geometry — us-atlas (https://github.com/topojson/us-atlas)
 
 Data Center Opposition Survey Visualization - https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx
 
-Github Repository - https://github.com/TreyMartin0/Assignment5_CSC477
-
-_There is two additional dataset in the repository that are not used, but I can provide links upon request if needed_
+Github Repository - https://github.com/TreyMartin0/Datacenter-Project
