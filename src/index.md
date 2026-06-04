@@ -1,8 +1,6 @@
 # When Communities Push Back: Public Resistance to the Data Center Boom
 
-Artificial intelligence has rapidly transformed from a niche technology into a major driver of economic investment. Behind every AI chatbot, image generator, and recommendation system is an enormous amount of computing infrastructure. As demand for AI continues to grow, so does the need for data centers.
-
-What was once an industry concentrated in a handful of technology hubs is now spreading across the country. Companies are proposing new facilities in urban areas, suburban communities, and rural regions alike, making data centers an increasingly visible part of the American landscape.
+Artificial intelligence has rapidly transformed from a niche technology into a major driver of economic investment, and behind every AI system is an enormous amount of computing infrastructure. As AI demand grows, so does the need for data centers. What was once concentrated in a handful of technology hubs is now spreading into urban areas, suburban communities, and rural regions alike [1].
 
 <style>
 :root {
@@ -193,11 +191,11 @@ display(html`<button
   "
 >${showProposed ? "Hide proposed facilities" : "Show proposed facilities"}</button>`);
 ```
-The map above illustrates both existing and proposed data centers across the United States. While existing facilities are already widespread, the number of proposed projects demonstrates that expansion is far from over. The growth of AI has created unprecedented demand for computing power, leading technology companies and developers to pursue new facilities at an accelerating pace.
+The map above illustrates both existing and proposed data centers across the United States. While existing facilities are already widespread, the number of proposed projects demonstrates that expansion is far from over. The growth of AI has created unprecedented demand for computing power, leading technology companies and developers to pursue new facilities at an accelerating pace. [2]
 
 However, the expansion of data centers has not been universally welcomed.
 
-Many residents view data centers as a source of concern rather than opportunity. Critics point to the large amounts of electricity and water these facilities consume, their potential environmental impacts, and the strain they can place on local infrastructure. Others question whether communities should bear these costs in order to support technologies that primarily benefit large corporations. Concerns about artificial intelligence itself, including its societal impacts, labor implications, and energy consumption, have further fueled opposition.
+Many residents view data centers as a source of concern rather than opportunity. Critics point to the large amounts of electricity and water these facilities consume, their potential environmental impacts, and the strain they can place on local infrastructure. Others question whether communities should bear these costs in order to support technologies that primarily benefit large corporations. Concerns about artificial intelligence itself, including its societal impacts, labor implications, and energy consumption, have further fueled opposition. [3]
 
 ```js
 const gallupData = [
@@ -284,19 +282,9 @@ gSvg.append("text")
 display(gSvg.node());
 ```
 
-Public opinion reflects these concerns. As shown above, a substantial majority of respondents express opposition to having data centers built in their communities. While motivations vary, the pattern is clear. Many people are skeptical of the costs associated with data center development and are increasingly willing to voice those concerns.
+As shown above, a substantial majority of Americans oppose having data centers built in their communities. [1] The question is whether that opposition actually matters. Developers often possess significant financial resources and political influence, yet public meetings, community organizing, and local government decisions can all affect the outcome of proposed developments. 
 
-The question, then, is whether that opposition actually matters.
-
-Developers and technology companies often possess significant financial resources and political influence, which can make large infrastructure projects appear inevitable. Yet local communities have more power than they may realize. Public meetings, community organizing, advocacy groups, and local government decisions can all affect the outcome of proposed developments.
-
-The final map highlights locations where proposed data centers have faced pushback, alongside projects that were ultimately canceled. It becomes apparent that areas that experienced substantial public pushback frequently overlap with locations where projects were later canceled.
-
-While community opposition is not the sole factor behind every cancellation, the relationship is difficult to ignore. Public pressure can influence local officials, affect permitting decisions, generate media attention, and increase the costs and risks associated with development. In many cases, organized residents have successfully altered or halted projects that once appeared certain to move forward.
-
-As demand for AI infrastructure continues to grow, conflicts over data center development are likely to become increasingly common. The expansion of technology will continue to affect communities across the country, but these decisions are not made in a vacuum. The evidence suggests that local voices can influence outcomes and that community engagement remains an important force in determining how and where future development occurs.
-
-The story of data centers is therefore not just a story about technology. It is also a story about civic participation. As communities confront the opportunities and challenges of the AI era, public engagement can play an important part in affecting what gets built, where it gets built, and whether it gets built at all.
+The final map highlights where proposed data centers have faced pushback alongside projects that were ultimately canceled. Areas with the most opposition (through available data) reside in the same counties where projects were later halted. [4] Not all hope is lost; communities that organize can realise change that meets the needs of people over the needs of corporations.
 
 ---
 
@@ -1145,3 +1133,10 @@ County boundary geometry — us-atlas (https://github.com/topojson/us-atlas)
 Data Center Opposition Survey Visualization - https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx
 
 Github Repository - https://github.com/TreyMartin0/Datacenter-Project
+
+
+## Claim References
+[1] https://www.reveliolabs.com/news/tech/data-centers-are-spreading-the-ai-boom-beyond-tech-hubs/
+[2] https://escholarship.org/uc/item/32d6m0d1
+[3] https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx
+[4] https://www.fractracker.org/2025/07/national-data-centers-tracker/
