@@ -282,7 +282,7 @@ gSvg.append("text")
 display(gSvg.node());
 ```
 
-As shown above, a substantial majority of Americans oppose having data centers built in their communities. [1] The question is whether that opposition actually matters. Developers often possess significant financial resources and political influence, yet public meetings, community organizing, and local government decisions can all affect the outcome of proposed developments. 
+As shown above, a substantial majority of Americans oppose having data centers built in their communities. [3] The question is whether that opposition actually matters. Developers often possess significant financial resources and political influence, yet public meetings, community organizing, and local government decisions can all affect the outcome of proposed developments. 
 
 The final map highlights where proposed data centers have faced pushback alongside projects that were ultimately canceled. Areas with the most opposition (through available data) reside in the same counties where projects were later halted. [4] Not all hope is lost; communities that organize can realise change that meets the needs of people over the needs of corporations.
 
@@ -1137,6 +1137,9 @@ Github Repository - https://github.com/TreyMartin0/Datacenter-Project
 
 ## Claim References
 [1] https://www.reveliolabs.com/news/tech/data-centers-are-spreading-the-ai-boom-beyond-tech-hubs/
+
 [2] https://escholarship.org/uc/item/32d6m0d1
+
 [3] https://news.gallup.com/poll/709772/americans-oppose-data-centers-area.aspx
+
 [4] https://www.fractracker.org/2025/07/national-data-centers-tracker/
